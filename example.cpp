@@ -46,7 +46,7 @@ int dw(){
 
     #ifdef _WIN32
         #ifdef _WIN64
-            printf("WIN x64 Application\n");
+            cout << "WIN x64 Application" << std::endl;
             const char* DLL_PATH = TEXT("DWDataReaderLib64.dll");
         #else
             printf("WIN x86 Application\n");
@@ -65,8 +65,10 @@ int dw(){
     DWInit(); //initiate dll
     std::cout << "DW Version = " << DWGetVersion() << "\n\n"; //Get dll version
 
-    if (!DWOpenDataFile("", &fi)){
-
+    if (!DWOpenDataFile("C:/Users/Public/Documents/Dewesoft/Data/Test.dxd", &fi)){
+        std::cout <<"Sample Rate: "<< fi.sample_rate << std::endl;
+        std::cout <<"Start Store Time: " << fi.start_store_time << std::endl;
+        std::cout << "Duration: " << fi.duration << std::endl;
     }
     
     return 1;
