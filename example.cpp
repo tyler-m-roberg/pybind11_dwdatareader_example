@@ -46,7 +46,7 @@ int dw(){
 
     #ifdef _WIN32
         #ifdef _WIN64
-            printf("WIN x64 Application\n");
+            cout << "WIN x64 Application" << std::endl;
             const char* DLL_PATH = TEXT("DWDataReaderLib64.dll");
         #else
             printf("WIN x86 Application\n");
