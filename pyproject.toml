@@ -4,4 +4,4 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pybind11_example"
-version = "0.0.1"
+version = "0.0.5"
