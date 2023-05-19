@@ -14,7 +14,8 @@ void thread_func(const uint64_t& start, const uint64_t& stop){
     
     for(uint64_t i = start; i < stop; i++){
         x = i * i;
-        std::cout << x << std::endl;
+        x = x + 1;
+        //std::cout << x << std::endl;
     }
 
     return;
@@ -132,7 +133,7 @@ int dw(){
     
     DWDeInit();
 
-    uint64_t inc = 999999999 / 4;
+    uint64_t inc = 999999 / 4;
     std::thread t1(thread_func, 0*inc, inc*1);
     std::thread t2(thread_func, 1*inc, inc*2);
     std::thread t3(thread_func, 2*inc, 3*inc);
