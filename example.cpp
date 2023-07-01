@@ -1,9 +1,19 @@
+#define NOMINMAX
+#undef max
+#undef min
 #include "DWLoadLib.h"
 
 #include<vector>
 #include <iostream>
 #include <chrono>
 #include <thread>
+
+// #undef max
+// #undef min
+
+
+#include <arrow/api.h>
+#include <arrow/python/pyarrow.h>
 
 #include <pybind11/pybind11.h>
 
@@ -21,7 +31,8 @@ void thread_func(const uint64_t& start, const uint64_t& stop){
     return;
 }
 
-int dw(){
+arrow::Status dw(){
+// int dw(){
     auto start = std::chrono::high_resolution_clock::now();
     int i, j, k, l;
     struct DWFileInfo fi;
@@ -73,7 +84,8 @@ int dw(){
     if (!LoadDWDLL(DLL_PATH))// Load DLL
     {
         std::cout << "Could not load dll object\n";
-        return 0;
+        return arrow::Status::OK();
+        // return 1;
     }
 
     DWInit(); //initiate dll
@@ -133,25 +145,52 @@ int dw(){
     
     DWDeInit();
 
-    uint64_t inc = 999999 / 4;
-    std::thread t1(thread_func, 0*inc, inc*1);
-    std::thread t2(thread_func, 1*inc, inc*2);
-    std::thread t3(thread_func, 2*inc, 3*inc);
-    std::thread t4(thread_func, 3*inc, 4*inc);
+    arrow::Int32Builder int8builder;
+    int32_t days_raw[5] = {1, 12, 17, 23, 28};
+    ARROW_RETURN_NOT_OK(int8builder.AppendValues(days_raw, 5));
+    std::shared_ptr<arrow::Array> days;
+    ARROW_ASSIGN_OR_RAISE(days, int8builder.Finish());
+    
+    auto int8_days = std::static_pointer_cast<arrow::Int32Array>(days);
 
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
+    auto value = int8_days->Value(0);
+    auto length = int8_days->length();
+
+    for (int64_t i = 0; i < length; i++){
+        auto value = int8_days->Value(i);
+        std::cout << "Value " << i << ": " << value << std::endl;
+    }
+    // uint64_t inc = 999999 / 4;
+    // std::thread t1(thread_func, 0*inc, inc*1);
+    // std::thread t2(thread_func, 1*inc, inc*2);
+    // std::thread t3(thread_func, 2*inc, 3*inc);
+    // std::thread t4(thread_func, 3*inc, 4*inc);
+
+    // t1.join();
+    // t2.join();
+    // t3.join();
+    // t4.join();
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Durration: " << duration.count() << std::endl;
     
 
-    
-    return 1;
+    // return 1;
+    return arrow::Status::OK();
 
+}
+
+int wrap_dw(){
+    arrow::py::import_pyarrow();
+    arrow::Status status = dw();
+
+    if (status == arrow::Status::OK()) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 float square(float x) {
@@ -160,6 +199,6 @@ float square(float x) {
 
 PYBIND11_MODULE(PyBind11Example, m) {
     m.def("square", &square);
-    m.def("dw", &dw);
+    m.def("wrap_dw", &wrap_dw);
 }
 
