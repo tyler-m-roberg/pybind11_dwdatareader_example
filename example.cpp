@@ -31,8 +31,9 @@ void thread_func(const uint64_t& start, const uint64_t& stop){
     return;
 }
 
-arrow::Status dw(){
+py::object dw(){
 // int dw(){
+    arrow::py::import_pyarrow();
     auto start = std::chrono::high_resolution_clock::now();
     int i, j, k, l;
     struct DWFileInfo fi;
@@ -84,7 +85,7 @@ arrow::Status dw(){
     if (!LoadDWDLL(DLL_PATH))// Load DLL
     {
         std::cout << "Could not load dll object\n";
-        return arrow::Status::OK();
+        return py::cast<py::none>(Py_None);
         // return 1;
     }
 
@@ -147,9 +148,15 @@ arrow::Status dw(){
 
     arrow::Int32Builder int8builder;
     int32_t days_raw[5] = {1, 12, 17, 23, 28};
-    ARROW_RETURN_NOT_OK(int8builder.AppendValues(days_raw, 5));
+    int8builder.AppendValues(days_raw, 5);
     std::shared_ptr<arrow::Array> days;
-    ARROW_ASSIGN_OR_RAISE(days, int8builder.Finish());
+    //ARROW_ASSIGN_OR_RAISE(days, int8builder.Finish());
+
+    auto result =  int8builder.Finish();
+
+    if (result.ok()) {
+        days = std::move(result.ValueUnsafe());
+    }
     
     auto int8_days = std::static_pointer_cast<arrow::Int32Array>(days);
 
@@ -160,6 +167,9 @@ arrow::Status dw(){
         auto value = int8_days->Value(i);
         std::cout << "Value " << i << ": " << value << std::endl;
     }
+
+    PyObject* object =  arrow::py::wrap_array(int8_days);
+
     // uint64_t inc = 999999 / 4;
     // std::thread t1(thread_func, 0*inc, inc*1);
     // std::thread t2(thread_func, 1*inc, inc*2);
@@ -177,20 +187,8 @@ arrow::Status dw(){
     
 
     // return 1;
-    return arrow::Status::OK();
+    return py::reinterpret_steal<py::object>(object);
 
-}
-
-int wrap_dw(){
-    arrow::py::import_pyarrow();
-    arrow::Status status = dw();
-
-    if (status == arrow::Status::OK()) {
-        return 0;
-    }
-    else {
-        return 1;
-    }
 }
 
 float square(float x) {
@@ -199,6 +197,6 @@ float square(float x) {
 
 PYBIND11_MODULE(PyBind11Example, m) {
     m.def("square", &square);
-    m.def("wrap_dw", &wrap_dw);
+    m.def("dw", &dw);
 }
 
