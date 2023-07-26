@@ -1,11 +1,14 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11"]
+requires = ["scikit-build-core", "pybind11", "pyarrow"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pybind11_example"
-version = "0.0.13"
+name = "pybind11example"
+version = "0.0.15"
 
 dependencies = [
 
 ]
+
+[tool.scikit-build]
+cmake.minimum-version = "3.23.22060601"

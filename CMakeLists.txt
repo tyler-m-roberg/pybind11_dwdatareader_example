@@ -2,35 +2,35 @@ cmake_minimum_required(VERSION 3.15...3.26)
 #project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX C)
 
-list(APPEND CMAKE_PREFIX_PATH "C:/src/vcpkg/packages/arrow_x64-windows")
-list(APPEND CMAKE_PREFIX_PATH "C:/Users/theoz/source/repos/PyBind11_Example/.venv/Lib/site-packages/pyarrow")
+set(Project_Base_DIR "C:\\Users\\theoz\\source\\repos\\PyBind11_Example")
+
+set(pybind11_DIR "${Project_Base_DIR}/.venv/Lib/site-packages/pybind11/share/cmake/pybind11")
+set(Arrow_DIR "C:/src/vcpkg/packages/arrow_x64-windows/share/arrow")
 
 
 set(PYBIND11_NEWPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 
-include_directories(.)
-include_directories(C:/Users/theoz/source/repos/PyBind11_Example/.venv/Lib/site-packages/pyarrow/include/)
-include_directories(C:/src/vcpkg/packages/arrow_x64-windows/include/arrow)
-include_directories("${PROJECT_SOURCE_DIR}")
-
-
-
 find_package(Arrow CONFIG REQUIRED)
-#find_package(ArrowPython HINTS "C:/Users/theoz/source/repos/PyBind11_Example/.venv/Lib/site-packages/pyarrow")
-    
-#include_directories("${PROJECT_SOURCE_DIR}/DWDataReader")
-#add_subdirectory(DWDataReader)
 
-#message("---Linking DWDataReader")
+message("Project Source Directory: ${PROJECT_SOURCE_DIR}")
+
+message("---Linking DWDataReader")
 add_library(DWDataReaderLib64 MODULE DWDataReaderLib64.dll)
-link_directories(C:/Users/theoz/source/repos/PyBind11_Example/.venv/Lib/site-packages/pyarrow)
 set_target_properties(DWDataReaderLib64 PROPERTIES LINKER_LANGUAGE C)
 
-pybind11_add_module(PyBind11Example example.cpp DWLoadLib.c)
-#target_link_libraries(${SKBUILD_PROJECT_NAME} PRIVATE DWDataReaderLib64)
+pybind11_add_module(pybind11example src/pybind11example/example.cpp src/pybind11example/DWLoadLib.c)
 
-target_link_libraries(PyBind11Example PRIVATE Arrow::arrow_shared arrow_python)
+target_include_directories(
+    pybind11example
+    PUBLIC
+    C:/src/vcpkg/packages/arrow_x64-windows/include/arrow
+    "${Project_Base_DIR}/.venv/Lib/site-packages/pyarrow/include"
+    C:/Users/theoz/AppData/Local/Programs/Python/Python311/include
+)
 
-install(TARGETS PyBind11Example LIBRARY DESTINATION .)
+target_link_directories(pybind11example PUBLIC "${Project_Base_DIR}/.venv/Lib/site-packages/pyarrow")
+target_link_libraries(pybind11example PUBLIC Arrow::arrow_shared arrow_python)
+
+install(TARGETS pybind11example LIBRARY DESTINATION ./pybind11example)
 
