@@ -133,34 +133,39 @@ py::object dw(){
     
     DWDeInit();
 
-    arrow::Int32Builder int8builder;
-    int32_t days_raw[5] = {1, 12, 17, 23, 28};
-    int8builder.AppendValues(days_raw, 5);
-    std::shared_ptr<arrow::Array> days;
-    //ARROW_ASSIGN_OR_RAISE(days, int8builder.Finish());
+    auto start_arrow = std::chrono::high_resolution_clock::now();
+    
+    arrow::DoubleBuilder doubleBuilder;
+    double days_raw[5] = {1, 12, 17, 23, 28};
+    doubleBuilder.Reserve(5);
+    doubleBuilder.AppendValues(days_raw, 5);
 
-    auto result =  int8builder.Finish();
+    std::shared_ptr<arrow::Array> days;
+
+    auto result =  doubleBuilder.Finish();
 
     if (result.ok()) {
         days = std::move(result.ValueUnsafe());
     }
     
-    auto int8_days = std::static_pointer_cast<arrow::Int32Array>(days);
+    auto double_days = std::static_pointer_cast<arrow::Int32Array>(days);
 
-    auto value = int8_days->Value(0);
-    auto length = int8_days->length();
+    // auto value = int8_days->Value(0);
+    // auto length = int8_days->length();
 
-    for (int64_t i = 0; i < length; i++){
-        auto value = int8_days->Value(i);
-        std::cout << "Value " << i << ": " << value << std::endl;
-    }
+    // for (int64_t i = 0; i < length; i++){
+    //     auto value = int8_days->Value(i);
+    //     std::cout << "Value " << i << ": " << value << std::endl;
+    // }
 
-    PyObject* object =  arrow::py::wrap_array(int8_days);
+    PyObject* object =  arrow::py::wrap_array(double_days);
 
+    auto end_arrow = std::chrono::high_resolution_clock::now();
 
+    std::cout << "Arrow Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_arrow - start_arrow).count() << std::endl;
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    std::cout << "Durration: " << duration.count() << std::endl;
+    std::cout << "Duration: " << duration.count() << std::endl;
     
 
     // return 1;

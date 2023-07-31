@@ -5,7 +5,7 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX C)
 set(Project_Base_DIR "C:\\Users\\theoz\\source\\repos\\PyBind11_Example")
 
 set(pybind11_DIR "${Project_Base_DIR}/.venv/Lib/site-packages/pybind11/share/cmake/pybind11")
-set(Arrow_DIR "C:/src/vcpkg/packages/arrow_x64-windows/share/arrow")
+set(Arrow_DIR "C:\\Users\\theoz\\source\\repos\\PyBind11_Example\\out\\build\\x64-debug\\vcpkg_installed\\x64-windows\\share\\arrow")
 
 
 set(PYBIND11_NEWPYTHON ON)
@@ -24,7 +24,7 @@ pybind11_add_module(pybind11example src/pybind11example/example.cpp src/pybind11
 target_include_directories(
     pybind11example
     PUBLIC
-    C:/src/vcpkg/packages/arrow_x64-windows/include/arrow
+    C:\\Users\\theoz\\source\\repos\\PyBind11_Example\\vcpkg_installed\\x64-windows\\include
     "${Project_Base_DIR}/.venv/Lib/site-packages/pyarrow/include"
     C:/Users/theoz/AppData/Local/Programs/Python/Python311/include
 )
